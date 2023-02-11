@@ -34,59 +34,74 @@ func (field *GF256) Polynomial() Polynomial {
 }
 
 // Add returns the sum of two GF(256) elements.
-func (field *GF256) Add(a byte, b byte) byte {
-	return a ^ b
+func (field *GF256) Add(x byte, y byte) byte {
+	return x ^ y
 }
 
 // Sub returns the difference of two GF(256) elements.  In all GF(2**k) fields,
 // addition and subtraction are the same operation because each element is its
 // own additive inverse.
-func (field *GF256) Sub(a byte, b byte) byte {
-	return field.Add(a, b)
+func (field *GF256) Sub(x byte, y byte) byte {
+	return field.Add(x, y)
 }
 
 // Mul returns the product of two GF(256) elements, modulo the irreducible
 // polynomial which was used to construct the field.
-func (field *GF256) Mul(a byte, b byte) byte {
-	if a == 0 || b == 0 {
+func (field *GF256) Mul(x byte, y byte) byte {
+	if x == 0 || y == 0 {
 		return 0
 	}
-	logA := uint(field.log[a])
-	logB := uint(field.log[b])
-	return field.exp[logA+logB]
+	logX := uint(field.log[x])
+	logY := uint(field.log[y])
+	return field.exp[logX+logY]
 }
 
 // Div returns the divisor of two GF(256) elements, modulo the irreducible
 // polynomial which was used to construct the field.  As usual, division is
 // only defined when the divisor is non-zero.
-func (field *GF256) Div(a byte, b byte) (byte, bool) {
-	if b == 0 {
+func (field *GF256) Div(x byte, y byte) (byte, bool) {
+	if y == 0 {
 		return 0, false
 	}
-	if a == 0 {
+	if x == 0 {
 		return 0, true
 	}
-	logA := uint(field.log[a])
-	logB := uint(field.log[b])
-	return field.exp[(logA+255-logB)%255], true
+	logX := uint(field.log[x]) + 255
+	logY := uint(field.log[y])
+	return field.exp[(logX-logY)%255], true
 }
 
 // Inv returns the multiplicative inverse of a non-zero GF(256) element.  In
-// other words, Mul(a, Inv(b)) is the same thing as Div(a, b).
-func (field *GF256) Inv(a byte) (byte, bool) {
-	if a == 0 {
+// other words, Mul(x, Inv(y)) is the same thing as Div(x, y).
+func (field *GF256) Inv(x byte) (byte, bool) {
+	if x == 0 {
 		return 0, false
 	}
-	logA := uint(field.log[a])
-	return field.exp[255-logA], true
+	return field.exp[255-field.log[x]], true
 }
 
 // Pow returns the first value, which must be an element of GF(256), to the
 // power of the second value.
-func (field *GF256) Pow(a byte, b uint) byte {
-	if a == 0 {
+func (field *GF256) Pow(x byte, y uint) byte {
+	if x == 0 {
 		return 0
 	}
-	logA := uint(field.log[a])
-	return field.exp[(logA*b)%255]
+	logX := uint(field.log[x])
+	return field.exp[(logX*y)%255]
+}
+
+// Log returns the base-2 logarithm of its argument, with multiplication
+// defined modulo the irreducible polynomial with which this field was
+// constructed.  As usual, the logarithm of 0 is undefined.
+func (field *GF256) Log(x byte) (byte, bool) {
+	if x == 0 {
+		return 0, false
+	}
+	return field.log[x], true
+}
+
+// Exp returns 2 to the power of its argument, with multiplication defined
+// modulo the irreducible polynomial with which this field was constructed..
+func (field *GF256) Exp(x byte) byte {
+	return field.exp[x]
 }
