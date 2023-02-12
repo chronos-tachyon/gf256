@@ -13,6 +13,7 @@
 // some irreducible polynomial with coefficients in GF(2).  There are 16 such
 // polynomials, and therefore there are 16 different ways to instantiate
 // GF(256).  Poly11D, which represents the polynomial x**8 + x**4 + x**3 + x**2
-// + 1, is a popular choice, but there are few reasons to select one polynomial
-// over another except for compatibility with existing algorithms.
+// + 1, is a popular choice because it's used in QR codes, but there are few
+// reasons to select one polynomial over another except for compatibility with
+// existing algorithms.
 package gf256

@@ -1,5 +1,9 @@
 package gf256
 
+import (
+	"fmt"
+)
+
 // GF256 represents a GF(256) field.
 type GF256 struct {
 	exp [512]byte
@@ -7,7 +11,7 @@ type GF256 struct {
 	p   Polynomial
 }
 
-// New constructs a GF256 value representing a Galois Field with multiplication
+// New constructs a GF256 value representing a Galois field with multiplication
 // defined in relation to the given irreducible polynomial with binary
 // coefficients.  The returned GF256 object is immutable and fully thread-safe.
 func New(p Polynomial) *GF256 {
@@ -18,13 +22,24 @@ func New(p Polynomial) *GF256 {
 	x := byte(1)
 	for i := uint(0); i < 255; i++ {
 		field.exp[i] = x
+		field.exp[i+255] = x
 		field.log[x] = byte(i)
-		x = slowMul(x, 2, p)
+		x = slowMul(x, p.Generator(), p)
 	}
 	for i := uint(255); i < 512; i++ {
 		field.exp[i] = field.exp[i-255]
 	}
 	return field
+}
+
+// GoString returns a string in Go syntax describing this GF256 value.
+func (field *GF256) GoString() string {
+	return fmt.Sprintf("gf256.New(%#v)", field.p)
+}
+
+// String returns a string describing this GF256 value.
+func (field *GF256) String() string {
+	return fmt.Sprintf("GF(256/%v)", field.p)
 }
 
 // Polynomial returns the identifying enum constant for the irreducible
